@@ -6,11 +6,22 @@
 
 'use strict';
 
-var path = require('path');
 var fs = require('fs');
 var crypto = require('crypto');
 var random = require('blear.utils.random');
 var typeis = require('blear.utils.typeis');
+var access = require('blear.utils.access');
+var number = require('blear.utils.number');
+var string = require('blear.utils.string');
+var date = require('blear.utils.date');
+var bigInt = require('big-integer');
+
+var regExist = /[aA0]/g;
+var dictionaryMap = {
+    a: 'abcdefghijklmnopqrstuvwxyz',
+    A: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+    0: '0123456789'
+};
 
 
 /**
@@ -144,5 +155,87 @@ exports.decode = function (data, secret) {
         /* istanbul ignore next */
         return '';
     }
+};
+
+
+var defaultUniqueLength = 16;
+var execTime = Date.now();
+var execOffset = 0;
+/**
+ * 生成随机不重复的字符串，建议最小长度为 16，如果不够
+ * @param [minLength=16] {number} 最小长度
+ * @param [dictionary] {string} 词典，默认 62 进制（A-Za-Z0-9）
+ * @returns {string}
+ *
+ * @example
+ * // 字典对应关系
+ * // a => a-z
+ * // A => A-Z
+ * // 0 => 0-9
+ */
+exports.unique = function (minLength, dictionary) {
+    var pool = '';
+    var args = access.args(arguments);
+
+    if (args.length === 1 && typeis.String(args[0])) {
+        dictionary = args[0];
+        minLength = defaultUniqueLength;
+    }
+
+    minLength = Math.max(number.parseInt(minLength, defaultUniqueLength), defaultUniqueLength);
+    dictionary = String(dictionary || 'aA0');
+
+    if (dictionary.indexOf('a') > -1) {
+        pool += dictionaryMap.a;
+    }
+
+    if (dictionary.indexOf('A') > -1) {
+        pool += dictionaryMap.A;
+    }
+
+    if (dictionary.indexOf('0') > -1) {
+        pool += dictionaryMap[0];
+    }
+
+    pool += dictionary.replace(regExist, '');
+
+    var system = pool.length;
+    var prefix = random.number(1, 9);
+    var guid = prefix + date.format('YYYYMMDDHHmmssSSS');
+    var now = Date.now();
+
+    if (execTime === now) {
+        execOffset++;
+    } else {
+        execOffset = 0;
+        execTime = now;
+    }
+
+    guid += string.padStart((execOffset).toString(), 8, '0');
+    guid = bigInt(guid);
+
+    var ret = [];
+
+    var _cal = function () {
+        var y = guid.mod(system);
+
+        guid = guid.divide(system);
+        ret.unshift(pool[y]);
+
+        if (guid.gt(0)) {
+            _cal();
+        }
+    };
+
+    _cal();
+
+    var rnd = ret.join('');
+    var length = rnd.length;
+
+    if (length < minLength) {
+        return rnd + random.string(minLength - length, dictionary);
+    }
+
+    return rnd;
 };
 

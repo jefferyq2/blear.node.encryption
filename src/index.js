@@ -17,10 +17,13 @@ var date = require('blear.utils.date');
 var bigInt = require('big-integer');
 
 var regExist = /[aA0]/g;
+// ！！！
+// 重要：字母、数字顺序一经确定就不能再二次变化
+// ！！！
 var dictionaryMap = {
-    a: 'abcdefghijklmnopqrstuvwxyz',
-    A: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
-    0: '0123456789'
+    a: 'dapkrwxmynsjhbflngiqozucet',
+    A: 'UWMGQXLAHFTSCRNNZJIOBYDKPE',
+    0: '7412603958'
 };
 
 
@@ -158,12 +161,12 @@ exports.decode = function (data, secret) {
 };
 
 
-var defaultUniqueLength = 16;
+var defaultUniqueLength = 8;
 var execTime = Date.now();
 var execOffset = 0;
 /**
  * 生成随机不重复的字符串，建议最小长度为 16，如果不够
- * @param [minLength=16] {number} 最小长度
+ * @param [minLength=12] {number} 最小长度
  * @param [dictionary] {string} 词典，默认 62 进制（A-Za-Z0-9）
  * @returns {string}
  *
@@ -174,7 +177,6 @@ var execOffset = 0;
  * // 0 => 0-9
  */
 exports.unique = function (minLength, dictionary) {
-    var pool = '';
     var args = access.args(arguments);
 
     if (args.length === 1 && typeis.String(args[0])) {
@@ -185,6 +187,40 @@ exports.unique = function (minLength, dictionary) {
     minLength = Math.max(number.parseInt(minLength, defaultUniqueLength), defaultUniqueLength);
     dictionary = String(dictionary || 'aA0');
 
+    var pool = generatePool(dictionary);
+    var now = Date.now();
+    var unique = (now).toString();
+
+    if (execTime === now) {
+        execOffset++;
+    } else {
+        execOffset = 0;
+        execTime = now;
+    }
+
+    unique += execOffset;
+    unique = numberConvert(unique, pool);
+
+    var length = unique.length;
+
+    if (length < minLength) {
+        unique = randomInsert(unique, minLength - length, dictionary);
+    }
+
+    return unique;
+};
+
+
+// ===================================
+// ===================================
+// ===================================
+/**
+ * 字符池
+ * @param dictionary
+ * @returns {string}
+ */
+function generatePool(dictionary) {
+    var pool = '';
     if (dictionary.indexOf('a') > -1) {
         pool += dictionaryMap.a;
     }
@@ -198,27 +234,39 @@ exports.unique = function (minLength, dictionary) {
     }
 
     pool += dictionary.replace(regExist, '');
+    return pool;
+}
 
-    var system = pool.length;
-    // 开头添加一个随机数，避免每次生成的字符串都高度相似
-    var prefix = random.number(1, 9);
-    var guid = prefix + date.format('YYYYMMDDHHmmssSSS');
-    var now = Date.now();
 
-    if (execTime === now) {
-        execOffset++;
-    } else {
-        execOffset = 0;
-        execTime = now;
+/**
+ * 指定次数随机插入数值
+ * @param string
+ * @param times
+ * @param dictionary
+ * @returns {*}
+ */
+function randomInsert(string, times, dictionary) {
+    var pool = random.string(times, dictionary);
+    while (times--) {
+        var pos = Math.random() > 0.5 ? 0 : string.length;
+        var rnd = pool[times];
+        string = string.slice(0, pos) + rnd + string.slice(pos);
     }
+    return string;
+}
 
-    // 添加8位固定长度的偏移量：9999,9999，
-    // 允许 1 ms 内有近 1 亿次的不重复
-    guid += string.padStart((execOffset).toString(), 8, '0');
+
+/**
+ * 任意数值任意进制转换
+ * @param guid
+ * @param pool
+ * @returns {string}
+ */
+function numberConvert(guid, pool) {
     guid = bigInt(guid);
-
     // 任意进制转换
     var ret = [];
+    var system = pool.length;
     var _cal = function () {
         var y = guid.mod(system);
 
@@ -232,13 +280,8 @@ exports.unique = function (minLength, dictionary) {
 
     _cal();
 
-    var rnd = ret.join('');
-    var length = rnd.length;
+    return ret.join('');
+}
 
-    if (length < minLength) {
-        return rnd + random.string(minLength - length, dictionary);
-    }
 
-    return rnd;
-};
 

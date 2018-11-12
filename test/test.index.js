@@ -47,18 +47,36 @@ describe('测试文件', function () {
 
     it('.unique', function () {
         var uni;
+        // var now = Date.now();
+        // var times = 0;
+        //
+        // while (now === Date.now()) {
+        //     encryption.unique();
+        //     times++;
+        // }
+        //
+        // console.log('1 ms执行 %d 次', times);
+
         uni = encryption.unique();
+        console.log(uni, uni.length);
+        uni = encryption.unique();
+        console.log(uni, uni.length);
+
+        uni = encryption.unique(20);
         console.log(uni, uni.length);
         uni = encryption.unique(20);
         console.log(uni, uni.length);
-        console.log(uni, uni.length);
+
         uni = encryption.unique('a');
         console.log(uni, uni.length);
+
         uni = encryption.unique('A');
         console.log(uni, uni.length);
+
         uni = encryption.unique('0');
         console.log(uni, uni.length);
-        uni = encryption.unique('a0A_-!@~');
+
+        uni = encryption.unique('`aA0~!@#$%^&*()_+-={}[]|\\:;\'",<.>/?');
         console.log(uni, uni.length);
     });
 });

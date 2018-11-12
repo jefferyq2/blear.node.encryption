@@ -200,6 +200,7 @@ exports.unique = function (minLength, dictionary) {
     pool += dictionary.replace(regExist, '');
 
     var system = pool.length;
+    // 开头添加一个随机数，避免每次生成的字符串都高度相似
     var prefix = random.number(1, 9);
     var guid = prefix + date.format('YYYYMMDDHHmmssSSS');
     var now = Date.now();
@@ -211,11 +212,13 @@ exports.unique = function (minLength, dictionary) {
         execTime = now;
     }
 
+    // 添加8位固定长度的偏移量：9999,9999，
+    // 允许 1 ms 内有近 1 亿次的不重复
     guid += string.padStart((execOffset).toString(), 8, '0');
     guid = bigInt(guid);
 
+    // 任意进制转换
     var ret = [];
-
     var _cal = function () {
         var y = guid.mod(system);
 

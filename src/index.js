@@ -12,8 +12,6 @@ var random = require('blear.utils.random');
 var typeis = require('blear.utils.typeis');
 var access = require('blear.utils.access');
 var number = require('blear.utils.number');
-var string = require('blear.utils.string');
-var date = require('blear.utils.date');
 var bigInt = require('big-integer');
 
 var regExist = /[aA0]/g;
@@ -21,8 +19,8 @@ var regExist = /[aA0]/g;
 // 重要：字母、数字顺序一经确定就不能再二次变化
 // ！！！
 var dictionaryMap = {
-    a: 'dapkrwxmynsjhbflngiqozucet',
-    A: 'UWMGQXLAHFTSCRNNZJIOBYDKPE',
+    a: 'dapkrwxmynsjhbflvgiqozucet',
+    A: 'UWMGQXLAHFTSCRNVZJIOBYDKPE',
     0: '7412603958'
 };
 

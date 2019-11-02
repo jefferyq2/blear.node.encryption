@@ -45,6 +45,33 @@ describe('测试文件', function () {
         expect(b).toEqual(original);
     });
 
+    it('.unique 唯一性', function () {
+        var times = 100000;
+        var map = {};
+
+        while (times--) {
+            var uni = encryption.unique();
+
+            if (map[uni]) {
+                map[uni]++;
+            } else {
+                map[uni] = 1;
+            }
+        }
+
+        var found = null;
+        for (var key in map) {
+            if (Object.prototype.hasOwnProperty.call(map, key)) {
+                if (map[key] > 1) {
+                    found = key;
+                    break;
+                }
+            }
+        }
+
+        expect(found).toBe(null);
+    });
+
     it('.unique', function () {
         var uni;
         // var now = Date.now();

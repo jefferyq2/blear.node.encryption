@@ -41,10 +41,8 @@
   "dependencies": {
     "big-integer": "^1.6.36",
     "blear.utils.access": "^1.0.5",
-    "blear.utils.date": "^1.0.11",
     "blear.utils.number": "^1.0.3",
     "blear.utils.random": "^1.0.4",
-    "blear.utils.string": "^1.0.11",
     "blear.utils.typeis": "^1.0.3"
   },
   "peerDependencies": {},

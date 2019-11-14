@@ -1,6 +1,6 @@
 {
   "name": "blear.node.encryption",
-  "version": "1.1.2",
+  "version": "1.1.3",
   "description": "NODE 端数据加密",
   "scripts": {
     "live": "browser-sync start --config bs-config.js",

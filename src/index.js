@@ -12,7 +12,6 @@ var random = require('blear.utils.random');
 var typeis = require('blear.utils.typeis');
 var access = require('blear.utils.access');
 var number = require('blear.utils.number');
-var bigInt = require('big-integer');
 
 var regExist = /[aA0]/g;
 // ！！！
@@ -186,19 +185,8 @@ exports.unique = function (minLength, dictionary) {
     dictionary = String(dictionary || 'aA0');
 
     var pool = generatePool(dictionary);
-    var now = Date.now();
-    var unique = (now).toString();
-
-    if (execTime === now) {
-        execOffset++;
-    } else {
-        execOffset = 0;
-        execTime = now;
-    }
-
-    unique += execOffset;
-    unique = numberConvert(unique, pool);
-
+    var guid = random.guid();
+    var unique = number.toAny(guid, pool);
     var length = unique.length;
 
     if (length < minLength) {
@@ -252,34 +240,4 @@ function randomInsert(string, times, dictionary) {
     }
     return string;
 }
-
-
-/**
- * 任意数值任意进制转换
- * @param guid
- * @param pool
- * @returns {string}
- */
-function numberConvert(guid, pool) {
-    guid = bigInt(guid);
-    // 任意进制转换
-    var ret = [];
-    var system = pool.length;
-    var _cal = function () {
-        var y = guid.mod(system);
-
-        guid = guid.divide(system);
-        ret.unshift(pool[y]);
-
-        if (guid.gt(0)) {
-            _cal();
-        }
-    };
-
-    _cal();
-
-    return ret.join('');
-}
-
-
 
